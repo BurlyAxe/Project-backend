@@ -67,9 +67,13 @@ async function updateVideogame(req, res) {
         const { id } = req.params;
         const { name, price } = req.body;
 
-        if (!name || !price || price < 1) {
+        if (!name && !price) {
             return res.status(400).json({ message: "Datos insuficientes" })
         };
+
+        if ( price < 1 ) {
+            return res.status(400).json({ message: "Precio requerido" })
+        }
 
         const updateGame = await Videogame.findByIdAndUpdate(id, { name, price }, { new: true });
 
