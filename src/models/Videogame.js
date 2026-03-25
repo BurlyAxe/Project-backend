@@ -11,13 +11,15 @@ const videogameSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
-        relaseDate: {
+        releaseDate: {
             type: Date,
         },
         platforms: [
             {
-                platform: mongoose.Schema.Types.ObjectId,
-                ref: 'Platform',
+                platform: {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: 'Platform',
+                }
             },
         ],
         genre: {
@@ -32,7 +34,7 @@ const videogameSchema = new mongoose.Schema(
             type: Number,
             min: 1,
         },
-    }, 
+    },
     {
         timestamps: true,
     }
