@@ -1,7 +1,9 @@
 import mongoose from "mongoose";
 import Videogame from "../models/Videogame.js";
+import { populate } from "dotenv";
 
-async function getVideogame(req, res) {
+/*
+    async function getVideogame(req, res) {
     try {
         const videogames = await Videogame.find();
         res.status(200).json(videogames);
@@ -103,4 +105,74 @@ async function deleteVideogame(req, res) {
     };
 };
 
-export { getVideogame, getVideogameByName, getVideogameByGenre, createVideogame, updateVideogame, deleteVideogame };
+export { getVideogame, getVideogameByName, getVideogameByGenre, createVideogame, updateVideogame, deleteVideogame };*/
+
+const searchVideogame = async ( req, res, next ) => {
+    try {
+        const { q, releaseDate, platforms, genre, classification, minPrice, maxPrice, inStock, order, sort, page = 1, limit = 10 } = req.query;
+        let filter = {};
+
+        if ( q ) {
+            filter.$or = [
+                {name: {  $regex: q, $options: "i" } },
+                {description: { $regex: q, $options: "i" } } 
+            ];
+        };
+
+        if ( genre ) {
+            filter.genre = genre;
+        };
+
+        if ( classification ) {
+            filter.classification = classification;
+        };
+
+        if ( releaseDate ) {
+            filter.releaseDate = releaseDate;
+        };
+
+        if ( platforms ) {
+            filter ["platforms.platform"] =  platforms;
+        }
+
+        if ( minPrice || maxPrice ) {
+            filter.price = {};
+            if ( minPrice ) filter.price.$gte = parseFloat(minPrice);
+            if ( maxPrice ) filter.price.$lte = parseFloat(maxPrice);
+        };
+
+        if ( inStock === "true" ) filter.stock = { $gt: 0};
+        else if ( inStock === "false" ) filter.stock = { $eq: 0 };
+
+        let sortOption = {};
+
+        if ( sort ) {
+            const sortOrder = order === "desc" ? -1 : 1;
+            sortOption[sort] = sortOrder;
+        };
+
+        const skip = ( parseInt(page) - 1 ) * parseInt(limit);
+
+        const videogames = await Videogame.find(filter).populate("genre").populate("classification").populate("platforms.platform").sort(sortOption).skip(skip).limit(parseInt(limit));
+
+        const totalVideogames = await Videogame.countDocuments( filter );
+        const pages = Math.ceil( totalVideogames / parseInt(limit) );
+    
+        res.json({
+            videogames,
+            pagination: {
+                currentPage: parseInt(page),
+                pages,
+                totalResults: totalVideogames,
+                hasNext: parseInt(page) < pages,
+                hasPrev: parseInt(page) > 1,
+            }
+        });
+        
+    } catch (error) {
+        next(error);
+    };
+
+};
+
+export { searchVideogame, createVideogame };
