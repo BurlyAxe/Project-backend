@@ -1,10 +1,9 @@
 import mongoose from "mongoose";
 import Videogame from "../models/Videogame.js";
 
-
-const searchVideogame = async (req, res, next) => {
+const getVideogames = async (req, res, next) => {
     try {
-        const { q, releaseDate, platforms, genre, classification, minPrice, maxPrice, inStock, order, sort, page = 1, limit = 10 } = req.query;
+        const { q, releaseDate, platforms, genre, classification, minPrice, maxPrice, inStock, sort, order, page = 1, limit = 10 } = req.query;
 
         let filter = {};
 
@@ -16,7 +15,7 @@ const searchVideogame = async (req, res, next) => {
         }
 
         if (genre) {
-            filter.genre = genre;
+            filter.genre = { $in: genre.split(",") };
         }
 
         if (classification) {
@@ -24,11 +23,15 @@ const searchVideogame = async (req, res, next) => {
         }
 
         if (releaseDate) {
-            filter.releaseDate = releaseDate;
+            const date = new Date(releaseDate);
+            filter.releaseDate = {
+                $gte: new Date(date.setHours(0,0,0,0)),
+                $lte: new Date(date.setHours(23,59,59,999))
+            };
         }
 
         if (platforms) {
-            filter["platforms.platform"] = platforms;
+            filter.platforms = { $in: platforms.split(",") };
         }
 
         if (minPrice || maxPrice) {
@@ -38,36 +41,33 @@ const searchVideogame = async (req, res, next) => {
         }
 
         if (inStock === "true") filter.stock = { $gt: 0 };
-        else if (inStock === "false") filter.stock = { $eq: 0 };
+        if (inStock === "false") filter.stock = { $eq: 0 };
 
         let sortOption = {};
-
         if (sort) {
-            const sortOrder = order === "desc" ? -1 : 1;
-            sortOption[sort] = sortOrder;
+            sortOption[sort] = order === "desc" ? -1 : 1;
         }
 
-        const skip = (parseInt(page) - 1) * parseInt(limit);
+        const pageNumber = parseInt(page);
+        const limitNumber = parseInt(limit);
+        const skip = (pageNumber - 1) * limitNumber;
 
         const videogames = await Videogame.find(filter)
             .populate("genre")
             .populate("classification")
-            .populate("platforms.platform")
+            .populate("platforms")
             .sort(sortOption)
             .skip(skip)
-            .limit(parseInt(limit));
+            .limit(limitNumber);
 
-        const totalVideogames = await Videogame.countDocuments(filter);
-        const pages = Math.ceil(totalVideogames / parseInt(limit));
+        const total = await Videogame.countDocuments(filter);
 
-        return res.json({
-            videogames,
+        return res.status(200).json({
+            results: videogames,
             pagination: {
-                currentPage: parseInt(page),
-                pages,
-                totalResults: totalVideogames,
-                hasNext: parseInt(page) < pages,
-                hasPrev: parseInt(page) > 1,
+                page: pageNumber,
+                totalPages: Math.ceil(total / limitNumber),
+                totalResults: total
             }
         });
 
@@ -76,39 +76,21 @@ const searchVideogame = async (req, res, next) => {
     }
 };
 
-const getVideogame = async (req, res, next) => {
+const getVideogameById = async (req, res, next) => {
     try {
-        const videogames = await Videogame.find();
-        return res.status(200).json(videogames);
-    } catch (error) {
-        next(error);
-    }
-};
+        const { id } = req.params;
 
-const getVideogameByName = async (req, res, next) => {
-    try {
-        const nameVideogame = await Videogame.findOne({ name: req.params.name });
-
-        if (!nameVideogame) {
-            return res.status(400).json({ message: "No hay resultados para esa busqueda" });
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ message: "ID inválido" });
         }
 
-        return res.status(200).json(nameVideogame);
+        const videogame = await Videogame.findById(id).populate("genre").populate("classification").populate("platforms");
 
-    } catch (error) {
-        next(error);
-    }
-};
-
-const getVideogameByGenre = async (req, res, next) => {
-    try {
-        const genreVideogame = await Videogame.find({ genre: req.params.genre });
-
-        if (genreVideogame.length === 0) {
-            return res.status(400).json({ message: "No hay resultados para esa busqueda" });
+        if (!videogame) {
+            return res.status(404).json({ message: "Videojuego no encontrado" });
         }
 
-        return res.status(200).json(genreVideogame);
+        return res.status(200).json(videogame);
 
     } catch (error) {
         next(error);
@@ -119,7 +101,7 @@ const createVideogame = async (req, res, next) => {
     try {
         const { name, description, releaseDate, platforms, genre, classification, price } = req.body;
 
-        if (!name || !description || !releaseDate || !platforms || !Array.isArray(platforms) || !genre || !classification || !price) {
+        if (!name || !description || !releaseDate || !platforms || !Array.isArray(platforms) || platforms.length === 0 || !genre || !classification || !price) {
             return res.status(400).json({ message: "Todos los campos son requeridos" });
         }
 
@@ -128,10 +110,10 @@ const createVideogame = async (req, res, next) => {
             !mongoose.Types.ObjectId.isValid(classification) ||
             platforms.some(id => !mongoose.Types.ObjectId.isValid(id))
         ) {
-            return res.status(400).json({ message: "Id no validos" });
+            return res.status(400).json({ message: "IDs no válidos" });
         }
 
-        const newVideogame = await Videogame.create({
+        const newGame = await Videogame.create({
             name,
             description,
             releaseDate,
@@ -141,7 +123,7 @@ const createVideogame = async (req, res, next) => {
             price
         });
 
-        return res.status(200).json(newVideogame);
+        return res.status(201).json(newGame);
 
     } catch (error) {
         next(error);
@@ -158,20 +140,20 @@ const updateVideogame = async (req, res, next) => {
         }
 
         if (price && price < 1) {
-            return res.status(400).json({ message: "Precio requerido" });
+            return res.status(400).json({ message: "Precio inválido" });
         }
 
-        const updateGame = await Videogame.findByIdAndUpdate(
+        const updated = await Videogame.findByIdAndUpdate(
             id,
             { name, price },
             { new: true }
         );
 
-        if (!updateGame) {
-            return res.status(400).json({ message: "Fallo al actualizar datos" });
+        if (!updated) {
+            return res.status(404).json({ message: "No encontrado" });
         }
 
-        return res.status(200).json(updateGame);
+        return res.status(200).json(updated);
 
     } catch (error) {
         next(error);
@@ -181,17 +163,18 @@ const updateVideogame = async (req, res, next) => {
 const deleteVideogame = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const deletedVideogame = await Videogame.findByIdAndDelete(id);
 
-        if (!deletedVideogame) {
-            return res.status(400).json({ message: "Sin datos de videojuego" });
+        const deleted = await Videogame.findByIdAndDelete(id);
+
+        if (!deleted) {
+            return res.status(404).json({ message: "No encontrado" });
         }
 
-        return res.status(200).send();
+        return res.status(204).send();
 
     } catch (error) {
         next(error);
     }
 };
 
-export { searchVideogame, getVideogame, getVideogameByName, getVideogameByGenre, createVideogame, updateVideogame, deleteVideogame };
+export { getVideogames, getVideogameById, createVideogame, updateVideogame, deleteVideogame };

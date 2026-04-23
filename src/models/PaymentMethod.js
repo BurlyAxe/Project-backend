@@ -15,18 +15,35 @@ const paymentMethodSchema = new mongoose.Schema(
         },
         cardNumber: {
             type: String,
-            max: 16,
+            maxlength: 16,
+            required: function () {
+                return this.type === "credit_card";
+            }
         },
-        cardHolder:{
+        cardHolder: {
             type: String,
             trim: true,
+            required: true,
+            required: function () {
+                return this.type === "credit_card";
+            }
         },
         cvv: {
             type: String,
-            max: 4,
+            maxlength: 4,
+            required: function () {
+                return this.type === "credit_card";
+            }
         },
         expirationDate: {
             type: Date,
+            required: true,
+            validate: {
+                validator: function (value) {
+                    return value > new Date();
+                },
+                message: "La tarjeta está expirada"
+            }
         },
         isDefault: {
             type: Boolean,

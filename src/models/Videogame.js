@@ -14,14 +14,12 @@ const videogameSchema = new mongoose.Schema(
         releaseDate: {
             type: Date,
         },
-        platforms: [
-            {
-                platform: {
-                    type: mongoose.Schema.Types.ObjectId,
-                    ref: 'Platform',
-                }
-            },
-        ],
+       platforms: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Platform',
+        }
+    ],
         genre: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Genre',
