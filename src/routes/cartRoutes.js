@@ -30,8 +30,8 @@ const putCartValidation = [
     body("videogames.*.quantity").isInt({ min: 1 }).withMessage("La cantidad debe ser un número entero mayor a 1"),
 ];
 
-router.get("/cart", authMiddleware, isAdmin, getCart);
-router.get("/cart/:id", authMiddleware, isAdmin, CartValidation, validate, getCartById);
+router.get("/cart", getCart);
+router.get("/cart/:id", CartValidation, validate, getCartById);
 router.get("/cart/user/:userId", authMiddleware, UserValidation, validate, getCartByUser);
 router.post("/cart", authMiddleware, createCartValidation, validate, createCart);
 router.put("/cart/:id",authMiddleware, putCartValidation, validate, updateCart);

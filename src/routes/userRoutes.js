@@ -23,10 +23,10 @@ const updateUserValidation = [
   body("role").optional().isIn(["customer", "admin"]).withMessage("Role must be customer or admin"),
 ];
 
-router.get("/users", authMiddleware, isAdmin, getUsers);
-router.get("/users/:id",authMiddleware, isAdmin, userIdValidation, validate, getUserById,);
-router.post("/users",authMiddleware, isAdmin, createUserValidation, validate, createUser,);
-router.put("/users/:id", authMiddleware, isAdmin, [...userIdValidation, ...updateUserValidation], validate, updateUser,);
-router.delete(  "/users/:id", userIdValidation, validate, authMiddleware,isAdmin, deleteUser,);
+router.get("/users", getUsers);
+router.get("/users/:id",userIdValidation, validate, getUserById,);
+router.post("/users", createUserValidation, validate, createUser,);
+router.put("/users/:id",[...userIdValidation, ...updateUserValidation], validate, updateUser,);
+router.delete(  "/users/:id", userIdValidation, validate, deleteUser,);
 
 export default router;

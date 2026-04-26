@@ -9,9 +9,8 @@ const generateToken = (userId, name, role) => {
 };
 
 const generateRefreshToken = (userId) => {
-  const refreshToken = jwt.sign({ userId }, process.env.JWT_REFRESH_TOKEN, {
-    expiresIn: "7d",
-  });
+  console.log('REFRESH TOKEN ENV:', process.env.JWT_REFRESH_TOKEN);
+  const refreshToken = jwt.sign({ userId },'test123');
 
   return { token: refreshToken, userId };
 };

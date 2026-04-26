@@ -11,7 +11,7 @@ const createGenreValidation = [
     body("name").notEmpty().withMessage("Nombre de genero requerido").isMongoId().withMessage("El ID es invalido")
 ];
 
-router.get("/", authMiddleware, isAdmin, getGenres);
-router.post("/", authMiddleware, createGenreValidation, validate,  createGenre);
+router.get("/genres", authMiddleware, isAdmin, getGenres);
+router.post("/genres", authMiddleware, createGenreValidation, validate,  createGenre);
 
 export default router;

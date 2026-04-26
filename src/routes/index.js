@@ -7,16 +7,18 @@ import orderRoutes from "./orderRoutes.js";
 import platformsRoutes from "./platformsRoutes.js";
 import videogameRoutes from "./videogameRoutes.js";
 import paymentMethodRoutes from "./paymentMethodRoutes.js"
+import userRoutes from "./userRoutes.js";
 
 const router = express.Router();
 
 router.use("/auth", authRoutes)
-router.use(addressRoutes);
-router.use(cartRoutes);
-router.use(genreRoutes);
-router.use(orderRoutes);
-router.use(platformsRoutes);
-router.use(videogameRoutes);
-router.use(paymentMethodRoutes);
+router.use("/address", addressRoutes);
+router.use("/cart", cartRoutes);
+router.use("/genres", genreRoutes);
+router.use("/orders", orderRoutes);
+router.use("/platforms", platformsRoutes);
+router.use("/games", videogameRoutes);
+router.use("/payment-methods", paymentMethodRoutes);
+router.use("/users", userRoutes);
 
 export default router;

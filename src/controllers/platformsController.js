@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import Platform from "../models/Platform.js";
+import Platform from "../models/Plataform.js";
 
 const getPlatforms = async (req, res, next) => {
     try {

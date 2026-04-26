@@ -30,9 +30,9 @@ const orderStatusValidation = [
     body("paymentSatuts").optional().isIn(["pending", "paid", "failed"]).withMessage("Estado del pago invalido"),
 ];
 
-router.get("/", authMiddleware, isAdmin, getOrder);
-router.get("/:id",authMiddleware, orderValidation, validate, getOrderById);
-router.post("/", authMiddleware, createOrderValidation, validate, createOrder);
-router.put("/:id/status", authMiddleware, orderStatusValidation, validate, updateOrderStatus);
+router.get("/orders", authMiddleware, isAdmin, getOrder);
+router.get("/orders/:id",authMiddleware, orderValidation, validate, getOrderById);
+router.post("/orders", authMiddleware, createOrderValidation, validate, createOrder);
+router.put("/orders/:id/status", authMiddleware, orderStatusValidation, validate, updateOrderStatus);
 
 export default router;

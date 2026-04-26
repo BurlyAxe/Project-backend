@@ -30,8 +30,8 @@ const updateVideogameValidation = [
 
 router.get("/games", authMiddleware, isAdmin, getVideogames);
 router.get ("/games/:id", authMiddleware, videogameIdValidation, validate, getVideogameById);
-router.post ("/games", authMiddleware, createVideogame, validate, createVideogame);
-router.put("/games/:id", authMiddleware, updateVideogame, validate, updateVideogame);
-router.delete("/games/:id", deleteVideogame);
+router.post ("/games", authMiddleware, createVideogameValidation, validate, createVideogame);
+router.put("/games/:id", authMiddleware, updateVideogameValidation, validate, updateVideogame);
+router.delete("/games/:id", authMiddleware, videogameIdValidation, validate, deleteVideogame);
 
 export default router;

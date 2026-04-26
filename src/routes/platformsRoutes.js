@@ -11,7 +11,7 @@ const createPlatformValidation = [
     body("name").notEmpty().withMessage("El nombre de la plataforma es reqerido").isMongoId().withMessage("El ID de la plataforma es invalido"),
 ];
 
-router.get("/", authMiddleware, isAdmin, getPlatforms);
-router.post("/", authMiddleware, createPlatform, validate, createPlatform);
+router.get("/platforms", authMiddleware, isAdmin, getPlatforms);
+router.post("/platforms", authMiddleware, createPlatformValidation, validate, createPlatform);
 
 export default router;
