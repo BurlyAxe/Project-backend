@@ -107,7 +107,6 @@ const createVideogame = async (req, res, next) => {
 
         if (
             !mongoose.Types.ObjectId.isValid(genre) ||
-            !mongoose.Types.ObjectId.isValid(classification) ||
             platforms.some(id => !mongoose.Types.ObjectId.isValid(id))
         ) {
             return res.status(400).json({ message: "IDs no válidos" });
@@ -133,9 +132,9 @@ const createVideogame = async (req, res, next) => {
 const updateVideogame = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const { name, price } = req.body;
+        const { name, price, stock} = req.body;
 
-        if (!name && !price) {
+        if (!name === undefined && price === undefined && stock === undefined) {
             return res.status(400).json({ message: "Datos insuficientes" });
         }
 
@@ -145,7 +144,7 @@ const updateVideogame = async (req, res, next) => {
 
         const updated = await Videogame.findByIdAndUpdate(
             id,
-            { name, price },
+            { name, price, stock },
             { new: true }
         );
 

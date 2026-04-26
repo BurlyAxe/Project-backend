@@ -12,13 +12,13 @@ import userRoutes from "./userRoutes.js";
 const router = express.Router();
 
 router.use("/auth", authRoutes)
-router.use("/address", addressRoutes);
-router.use("/cart", cartRoutes);
-router.use("/genres", genreRoutes);
-router.use("/orders", orderRoutes);
-router.use("/platforms", platformsRoutes);
-router.use("/games", videogameRoutes);
-router.use("/payment-methods", paymentMethodRoutes);
-router.use("/users", userRoutes);
+router.use(addressRoutes);
+router.use(cartRoutes);
+router.use(genreRoutes);
+router.use(orderRoutes);
+router.use(platformsRoutes);
+router.use(videogameRoutes);
+router.use(paymentMethodRoutes);
+router.use(userRoutes);
 
 export default router;

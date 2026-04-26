@@ -8,10 +8,10 @@ import validate from "../middlewares/validation.js";
 const router = express.Router();
 
 const createPlatformValidation = [
-    body("name").notEmpty().withMessage("El nombre de la plataforma es reqerido").isMongoId().withMessage("El ID de la plataforma es invalido"),
+    body("name").notEmpty().withMessage("El nombre de la plataforma es reqerido"),
 ];
 
-router.get("/platforms", authMiddleware, isAdmin, getPlatforms);
-router.post("/platforms", authMiddleware, createPlatformValidation, validate, createPlatform);
+router.get("/platforms", getPlatforms);
+router.post("/platforms", createPlatformValidation, validate, createPlatform);
 
 export default router;

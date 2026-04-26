@@ -1,46 +1,49 @@
-import PaymentMethod from "../models/PaymentMethod.js"
+import PaymentMethod from "../models/PaymentMethod.js";
 
 const getPaymentMethod = async (req, res, next) => {
     try {
-        const user = req.body.user;
+        const { user } = req.query;
+
         const payment = await PaymentMethod.find({ user }).select("-cvv");
-        res.json(payment)
+
+        res.json(payment);
     } catch (error) {
-        next(error)
+        next(error);
     }
 };
 
 const getPaymentMethodById = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const paymentId = await PaymentMethod.findById(id).select("-cvv");
+        const { user } = req.query;
+
+        const paymentId = await PaymentMethod.findOne({ _id: id, user }).select("-cvv");
 
         if (!paymentId) {
             return res.status(404).json({ message: "Metodo de pago no encontrado" });
-        };
+        }
 
         res.status(200).json(paymentId);
-
     } catch (error) {
-        next(error)
+        next(error);
     }
 };
 
 const createPaymentMethod = async (req, res, next) => {
     try {
-        const { user, type, cardNumber, cardHolder, cvv, expirationDate } = req.body;
+        const { user, type, cardNumber, cardHolder, cvv, expirationDate, isDefault } = req.body;
 
         if (!user || !type) {
-            return res.status(400).json({ message: "El usuario y tipo de tarjeta son requeridos" })
-        };
+            return res.status(400).json({ message: "El usuario y tipo son requeridos" });
+        }
 
         if (type === "credit_card") {
             if (!cardNumber || !cardHolder || !cvv || !expirationDate) {
-                return res.status(400).json({ message: "Usuario y tipo requeridos" });
+                return res.status(400).json({ message: "Datos de tarjeta incompletos" });
             }
-        };
+        }
 
-        if (isDefault) { 
+        if (isDefault) {
             await PaymentMethod.updateMany({ user }, { isDefault: false });
         }
 
@@ -51,27 +54,27 @@ const createPaymentMethod = async (req, res, next) => {
             cardHolder,
             cvv,
             expirationDate,
-            isDefault,
+            isDefault
         });
 
         const paymentResponse = newPayment.toObject();
         delete paymentResponse.cvv;
 
         return res.status(201).json(paymentResponse);
+
     } catch (error) {
-        next(error)
+        next(error);
     }
 };
 
 const updatePaymentMethod = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const userId = req.body.user;
-        const { cardNumber, expirationDate, isDefault } = req.body;
+        const { user, cardNumber, expirationDate, isDefault } = req.body;
 
-        if (!cardNumber && !expirationDate && isDefault === undefined) {
-            return res.status(400).json({ message: "Datos insuficientes" })
-        };
+        if (!user) {
+            return res.status(400).json({ message: "User requerido" });
+        }
 
         const updateFields = {};
 
@@ -80,36 +83,55 @@ const updatePaymentMethod = async (req, res, next) => {
         if (typeof isDefault === "boolean") updateFields.isDefault = isDefault;
 
         if (isDefault) {
-            await PaymentMethod.updateMany({ user: userId }, { isDefault: false });
+            await PaymentMethod.updateMany({ user }, { isDefault: false });
         }
 
-        const updatePayment = await PaymentMethod.findOneAndUpdate({ _id: id, user: userId },updateFields,{ new: true }).select("-cvv");
+        const updatePayment = await PaymentMethod.findOneAndUpdate(
+            { _id: id, user },
+            updateFields,
+            { new: true }
+        ).select("-cvv");
 
         if (!updatePayment) {
             return res.status(404).json({ message: "Método de pago no encontrado" });
-        };
+        }
 
-        return res.status(200).json(updatePayment)
+        return res.status(200).json(updatePayment);
+
     } catch (error) {
-        next(error)
+        next(error);
     }
 };
 
 const deletePaymentMethod = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const user = req.user;
+        const { user } = req.body;
 
-        const deletePayment = await PaymentMethod.findOneAndDelete({_id: id,user});
+        if (!user) {
+            return res.status(400).json({ message: "User requerido" });
+        }
+
+        const deletePayment = await PaymentMethod.findOneAndDelete({
+            _id: id,
+            user
+        });
 
         if (!deletePayment) {
-            return res.status(404).json({ message: "Método de pago no encontrado"});
+            return res.status(404).json({ message: "Método de pago no encontrado" });
         }
 
         return res.status(204).send();
+
     } catch (error) {
-        next(error)
+        next(error);
     }
 };
 
-export { getPaymentMethod, getPaymentMethodById, createPaymentMethod, updatePaymentMethod, deletePaymentMethod };
+export {
+    getPaymentMethod,
+    getPaymentMethodById,
+    createPaymentMethod,
+    updatePaymentMethod,
+    deletePaymentMethod
+};

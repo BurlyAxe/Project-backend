@@ -1,28 +1,32 @@
-import mongoose from "mongoose"
+import mongoose from "mongoose";
 
 const cartSchema = new mongoose.Schema(
-    {
-        user: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
-            required: true,
-        },
-        videogames: [
-            {
-                videogame: {
-                    type: mongoose.Schema.Types.ObjectId,
-                    ref: "Videogame",
-                },
-                quantity: {
-                    type: Number,
-                    min: 1,
-                }
-            },
-        ],
+{
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+        unique: true
     },
-    {
-        timestamps: true,
-    }
+    videogames: [
+        {
+            videogame: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "Videogame",
+                required: true
+            },
+            quantity: {
+                type: Number,
+                min: 1,
+                required: true,
+                default: 1
+            }
+        }
+    ]
+},
+{
+    timestamps: true
+}
 );
 
 const Cart = mongoose.model("Cart", cartSchema);

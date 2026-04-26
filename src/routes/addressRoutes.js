@@ -22,6 +22,7 @@ const createAddressValidation = [
     .isPostalCode("any")
     .withMessage("Postal code must be a valid postal code"),
 ];
+
 const updateAddressValidation = [
   body("street").optional().notEmpty().withMessage("Street is required if provided"),
   body("city").optional().notEmpty().withMessage("City is required if provided"),

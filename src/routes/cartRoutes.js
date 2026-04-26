@@ -7,35 +7,47 @@ import validate from "../middlewares/validation.js";
 
 const router = express.Router();
 
-const CartValidation = [
-    param("id").isMongoId().withMessage("ID de carrito no válido"),
+const cartIdValidation = [
+    param("cartId").isMongoId().withMessage("ID de carrito no válido"),
 ];
 
-const UserValidation = [
-    param("id").isMongoId().withMessage("ID de usuario no válido"),
+const userIdValidation = [
+    param("userId").isMongoId().withMessage("ID de usuario no válido"),
 ];
 
 const createCartValidation = [
-    body("user").notEmpty().withMessage("El usuario es requerido").isMongoId().withMessage("ID de usuario no válido"),
+    param("userId").isMongoId().withMessage("ID de usuario no válido"),
     body("videogames").optional().isArray().withMessage("Los videojuegos deben ser un array"),
-    body("videogames.*.videogame").isMongoId().withMessage("ID de videojuego no válido"),
-    body("videogames.*.quantity").isInt({ min: 1 }).withMessage("La cantidad debe ser un número entero mayor a 1"),
+    body("videogames.*.videogame").optional().isMongoId().withMessage("ID de videojuego no válido"),
+    body("videogames.*.quantity").optional().isInt({ min: 1 }).withMessage("La cantidad debe ser un número entero mayor a 1"),
 ];
 
-const putCartValidation = [
-    param("id").isMongoId().withMessage("ID de carrito no válido"),
-    body("user").notEmpty().withMessage("El usuario es requerido").isMongoId().withMessage("ID de usuario no válido"),
+const updateCartValidation = [
+    param("userId").isMongoId().withMessage("ID de usuario no válido"),
+    param("cartId").isMongoId().withMessage("ID de carrito no válido"),
     body("videogames").optional().isArray().withMessage("Los videojuegos deben ser un array"),
-    body("videogames.*.videogame").isMongoId().withMessage("ID de videojuego no válido"),
-    body("videogames.*.quantity").isInt({ min: 1 }).withMessage("La cantidad debe ser un número entero mayor a 1"),
+    body("videogames.*.videogame").optional().isMongoId().withMessage("ID de videojuego no válido"),
+    body("videogames.*.quantity").optional().isInt({ min: 1 }).withMessage("La cantidad debe ser un número entero mayor a 1"),
+];
+
+const deleteCartValidation = [
+    param("userId").isMongoId().withMessage("ID de usuario no válido"),
+    param("cartId").isMongoId().withMessage("ID de carrito no válido"),
+    param("videogameId").optional().isMongoId().withMessage("ID de videojuego no válido"),
 ];
 
 router.get("/cart", getCart);
-router.get("/cart/:id", CartValidation, validate, getCartById);
-router.get("/cart/user/:userId", authMiddleware, UserValidation, validate, getCartByUser);
-router.post("/cart", authMiddleware, createCartValidation, validate, createCart);
-router.put("/cart/:id",authMiddleware, putCartValidation, validate, updateCart);
-router.delete("/cart/:id", authMiddleware, CartValidation, validate, deleteCart);
-router.post("/cart/add-videogame", authMiddleware, CartValidation, validate, addVideogamesToCart);
+
+router.get("/cart/:cartId", cartIdValidation, validate, getCartById);
+
+router.get("/users/:userId/cart", userIdValidation, validate, getCartByUser);
+
+router.post("/users/:userId/cart", createCartValidation, validate, createCart);
+
+router.post("/users/:userId/cart/items", userIdValidation, validate, addVideogamesToCart);
+
+router.put("/users/:userId/cart/:cartId", updateCartValidation, validate, updateCart);
+
+router.delete("/users/:userId/cart/:cartId", deleteCartValidation, validate, deleteCart);
 
 export default router;

@@ -1,9 +1,15 @@
 import Order from "../models/Order.js";
+import Cart from "../models/Cart.js";
 
 const getOrder = async (req, res, next) => {
     try {
-        const orders = await Order.find().populate("user").populate("videogames.videogame").populate("address").populate("paymentMethod");
-        res.json(orders);
+        const orders = await Order.find()
+            .populate("user")
+            .populate("videogames.videogame")
+            .populate("address")
+            .populate("paymentMethod");
+
+        res.status(200).json(orders);
     } catch (error) {
         next(error);
     }
@@ -11,14 +17,19 @@ const getOrder = async (req, res, next) => {
 
 const getOrderById = async (req, res, next) => {
     try {
-        const { id } = req.params;
-        const order = await Order.findById(id).populate("user").populate("videogames.videogame").populate("address").populate("paymentMethod");
+        const { orderId } = req.params;
+
+        const order = await Order.findById(orderId)
+            .populate("user")
+            .populate("videogames.videogame")
+            .populate("address")
+            .populate("paymentMethod");
 
         if (!order) {
-            return res.status(404).json({ message: "Orden ni encontrada" });
-        };
+            return res.status(404).json({ message: "Orden no encontrada" });
+        }
 
-        res.json(order);
+        res.status(200).json(order);
 
     } catch (error) {
         next(error);
@@ -27,11 +38,48 @@ const getOrderById = async (req, res, next) => {
 
 const createOrder = async (req, res, next) => {
     try {
-        const { user, videogames, address, paymentMethod, totalPrice, shippingCost } = req.body;
-        const newOrder = await Order.create({ user, videogames, address, paymentMethod, totalPrice, shippingCost});
-       
+        const { userId } = req.params;
+        const { address, paymentMethod, shippingCost = 0 } = req.body;
+
+        const cart = await Cart.findOne({ user: userId }).populate("videogames.videogame");
+
+        if (!cart || cart.videogames.length === 0) {
+            return res.status(400).json({ message: "El carrito está vacío" });
+        }
+
+        let totalPrice = 0;
+
+        const orderItems = cart.videogames.map(item => {
+            const price = item.videogame.price;
+
+            totalPrice += price * item.quantity;
+
+            return {
+                videogame: item.videogame._id,
+                quantity: item.quantity,
+                price
+            };
+        });
+
+        totalPrice += shippingCost;
+
+        const newOrder = await Order.create({
+            user: userId,
+            address,
+            paymentMethod,
+            videogames: orderItems,
+            shippingCost,
+            totalPrice
+        });
+
         await newOrder.populate("user");
         await newOrder.populate("videogames.videogame");
+        await newOrder.populate("address");
+        await newOrder.populate("paymentMethod");
+
+        // 🔥 Vaciar carrito después de comprar
+        cart.videogames = [];
+        await cart.save();
 
         res.status(201).json(newOrder);
 
@@ -42,20 +90,29 @@ const createOrder = async (req, res, next) => {
 
 const updateOrderStatus = async (req, res, next) => {
     try {
-        const { id } = req.params;
+        const { orderId } = req.params;
         const { status, paymentStatus } = req.body;
 
-        const updated = await Order.findByIdAndUpdate(id, {status, paymentStatus}, {new: true});
+        const updated = await Order.findByIdAndUpdate(
+            orderId,
+            { status, paymentStatus },
+            { new: true }
+        );
 
         if (!updated) {
             return res.status(404).json({ message: "Orden no encontrada" });
-        };
+        }
 
-        res.json(updated);
+        res.status(200).json(updated);
 
     } catch (error) {
         next(error);
     }
 };
 
-export { getOrder, getOrderById, createOrder, updateOrderStatus };
+export {
+    getOrder,
+    getOrderById,
+    createOrder,
+    updateOrderStatus
+};

@@ -25,8 +25,8 @@ const videogameSchema = new mongoose.Schema(
             ref: 'Genre',
         },
         classification: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Classification',
+            type: String,
+            required: true,
         },
         price: {
             type: Number,
@@ -34,7 +34,7 @@ const videogameSchema = new mongoose.Schema(
         },
         stock: {
             type: Number,
-            default: 0,
+            default: 1,
         },
     },
     {

@@ -13,17 +13,17 @@ const getAddress = async (req, res, next) => {
 const getAddressById = async (req, res, next) => {
     try {
         const { addressId } = req.params;
-        const userId = req.user.userId;
-        const address = await Address.findOne({ _id: addressId, user: userId });
 
-        if(!address) {
+        const address = await Address.findById(addressId);
+
+        if (!address) {
             return res.status(404).json({ message: "Dirección no encontrada" });
-        };
+        }
 
         res.status(200).json(address);
     } catch (error) {
         next(error);
-    };
+    }
 };
 
 const createAddress = async (req, res, next) => {
@@ -55,36 +55,22 @@ const createAddress = async (req, res, next) => {
 const updateAddress = async (req, res, next) => {
     try {
         const { addressId } = req.params;
-        const { name, country, state, city, street, postalCode, phone, isDefault, addressType } = req.body;
-        const user = req.user.userId;
 
-        const deliveryAddress = await Address.findOne({ _id: addressId, user });
+        const updatedAddress = await Address.findByIdAndUpdate(
+            addressId,
+            req.body,
+            { new: true, runValidators: true }
+        );
 
-        if (!deliveryAddress) {
-            return res.status(404).json({ message: "Direccion no encontrada"})
-        };
+        if (!updatedAddress) {
+            return res.status(404).json({ message: "Direccion no encontrada" });
+        }
 
-        if (isDefault && !deliveryAddress.isDefault) {
-            await Address.updateMany({ user }, { isDefault: false });
-        };
-
-        deliveryAddress.name = name; 
-        deliveryAddress.country = country;
-        deliveryAddress.state = state;
-        deliveryAddress.city = city;
-        deliveryAddress.street = street;
-        deliveryAddress.postalCode = postalCode;
-        deliveryAddress.phone = phone;
-        deliveryAddress.isDefault = isDefault;
-        deliveryAddress.addressType = addressType;
-
-        await deliveryAddress.save();
-
-        res.status(200).json(deliveryAddress);
+        res.status(200).json(updatedAddress);
 
     } catch (error) {
         next(error);
-    };
+    }
 };
 
 const deleteAddress = async (req, res, next) => {
@@ -92,7 +78,7 @@ const deleteAddress = async (req, res, next) => {
         const { addressId } = req.params;
         const userId = req.user.userId;
 
-        const deletedAddress = await Address.findOne({ _id: addressId, user: userId });
+        const deletedAddress = await Address.findById(addressId);
 
         if(!deletedAddress) {
             return res.status(404).json({ message: "Dirección no encontrada" });    

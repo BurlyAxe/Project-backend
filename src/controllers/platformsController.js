@@ -13,7 +13,10 @@ const getPlatforms = async (req, res, next) => {
 const createPlatform = async (req, res, next) => {
     try {
         const { name } = req.body;
-        const newPlatform = await Platform.create({ name });
+        const slug = name.toLowerCase().replace(/ /g, "-");
+        
+        const newPlatform = await Platform.create({ name, slug });
+
         res.status(201).json(newPlatform);
     } catch (error) {
         next(error);
