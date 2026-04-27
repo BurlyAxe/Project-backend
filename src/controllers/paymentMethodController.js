@@ -15,7 +15,6 @@ const getPaymentMethod = async (req, res, next) => {
 const getPaymentMethodById = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const { user } = req.query;
 
         const paymentId = await PaymentMethod.findOne({ _id: id, user }).select("-cvv");
 
