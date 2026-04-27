@@ -26,10 +26,10 @@ const updatePaymentValidation = [
     body("isDefault").optional().isBoolean().withMessage("isDefault debe ser booleano")
 ];
 
-router.get("/payment", getPaymentMethod);
-router.get("/payment/:id", paymentIdValidation, validate, getPaymentMethodById);
-router.post("/payment", createPaymentValidation, validate, createPaymentMethod);
-router.put("/payment/:id", updatePaymentValidation, validate, updatePaymentMethod);
-router.delete("/payment/:id", paymentIdValidation, validate, deletePaymentMethod);
+router.get("/payment", authMiddleware, isAdmin, getPaymentMethod);
+router.get("/payment/:id", authMiddleware, paymentIdValidation, validate, getPaymentMethodById);
+router.post("/payment", authMiddleware, createPaymentValidation, validate,  createPaymentMethod);
+router.put("/payment/:id", authMiddleware, updatePaymentValidation, validate, updatePaymentMethod);
+router.delete("/payment", authMiddleware, deletePaymentMethod);
 
 export default router;

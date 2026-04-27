@@ -26,12 +26,10 @@ const orderStatusValidation = [
     body("paymentStatus").optional().isIn(["pending", "paid", "failed"]),
 ];
 
-router.get("/orders", getOrder);
-
-router.get("/users/:userId/orders/:orderId", userIdValidation, orderIdValidation, validate, getOrderById);
-
-router.post("/users/:userId/orders", createOrderValidation, validate, createOrder);
-
-router.put("/users/:userId/orders/:orderId/status", orderStatusValidation, validate, updateOrderStatus);
+router.get("/orders", authMiddleware, isAdmin, getOrder);
+router.get("/users/:userId/orders", authMiddleware, userIdValidation, validate, getOrder);
+router.get("/users/:userId/orders/:orderId", authMiddleware, userIdValidation, orderIdValidation, validate, getOrderById);
+router.post("/users/:userId/orders", authMiddleware, createOrderValidation, validate, createOrder);
+router.put("/users/:userId/orders/:orderId/status", authMiddleware, orderStatusValidation, validate, updateOrderStatus);
 
 export default router;

@@ -32,10 +32,10 @@ const updateAddressValidation = [
     .withMessage("Zipcode must be a valid postal code if provided"),
 ];
 
-router.get("/users/:id/address", getAddress);
-router.get("/users/:id/address/:addressId", userIdValidation, addressIdValidation, validate, getAddressById);
-router.post("/users/:id/address", userIdValidation, createAddressValidation, createAddress);
-router.put("/users/:id/address/:addressId", userIdValidation, addressIdValidation, updateAddressValidation, validate, updateAddress);
-router.delete("/users/:id/address/:addressId", userIdValidation, addressIdValidation, validate, deleteAddress);
+router.get("/users/:id/address", authMiddleware, isAdmin, getAddress);
+router.get("/users/:id/address/:addressId",authMiddleware, userIdValidation, addressIdValidation, validate, getAddressById);
+router.post("/users/:id/address", authMiddleware, userIdValidation, createAddressValidation, createAddress);
+router.put("/users/:id/address/:addressId", authMiddleware, userIdValidation, addressIdValidation, updateAddressValidation, validate, updateAddress);
+router.delete("/users/:id/address/:addressId", authMiddleware, userIdValidation, addressIdValidation, validate, deleteAddress);
 
 export default router;

@@ -36,18 +36,12 @@ const deleteCartValidation = [
     param("videogameId").optional().isMongoId().withMessage("ID de videojuego no válido"),
 ];
 
-router.get("/cart", getCart);
-
-router.get("/cart/:cartId", cartIdValidation, validate, getCartById);
-
-router.get("/users/:userId/cart", userIdValidation, validate, getCartByUser);
-
-router.post("/users/:userId/cart", createCartValidation, validate, createCart);
-
-router.post("/users/:userId/cart/items", userIdValidation, validate, addVideogamesToCart);
-
-router.put("/users/:userId/cart/:cartId", updateCartValidation, validate, updateCart);
-
-router.delete("/users/:userId/cart/:cartId", deleteCartValidation, validate, deleteCart);
+router.get("/cart", authMiddleware, isAdmin, getCart);
+router.get("/cart/:cartId", authMiddleware, isAdmin,  cartIdValidation, validate, getCartById);
+router.get("/users/:userId/cart", authMiddleware, userIdValidation, validate, getCartByUser);
+router.post("/users/:userId/cart", authMiddleware, createCartValidation, validate, createCart);
+router.post("/users/:userId/cart/items", authMiddleware, userIdValidation, validate, addVideogamesToCart);
+router.put("/users/:userId/cart/:cartId", authMiddleware, updateCartValidation, validate, updateCart);
+router.delete("/users/:userId/cart/:cartId", authMiddleware, deleteCartValidation, validate, deleteCart);
 
 export default router;

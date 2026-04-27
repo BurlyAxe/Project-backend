@@ -4,7 +4,12 @@ const getPaymentMethod = async (req, res, next) => {
     try {
         const { user } = req.query;
 
-        const payment = await PaymentMethod.find({ user }).select("-cvv");
+        let filter = {};
+        if (user) {
+            filter.user = user;
+        }
+
+        const payment = await PaymentMethod.find(filter).select("-cvv");
 
         res.json(payment);
     } catch (error) {
@@ -16,13 +21,14 @@ const getPaymentMethodById = async (req, res, next) => {
     try {
         const { id } = req.params;
 
-        const paymentId = await PaymentMethod.findOne({ _id: id, user }).select("-cvv");
+        const payment = await PaymentMethod.findById(id).select("-cvv");
 
-        if (!paymentId) {
+        if (!payment) {
             return res.status(404).json({ message: "Metodo de pago no encontrado" });
         }
 
-        res.status(200).json(paymentId);
+        res.status(200).json(payment);
+
     } catch (error) {
         next(error);
     }
@@ -56,12 +62,14 @@ const createPaymentMethod = async (req, res, next) => {
             isDefault
         });
 
+        console.log("CREATED:", newPayment);
         const paymentResponse = newPayment.toObject();
         delete paymentResponse.cvv;
 
         return res.status(201).json(paymentResponse);
 
     } catch (error) {
+        console.error("Error creating payment method:", error);
         next(error);
     }
 };
@@ -104,29 +112,25 @@ const updatePaymentMethod = async (req, res, next) => {
 
 const deletePaymentMethod = async (req, res, next) => {
     try {
-        const { id } = req.params;
-        const { user } = req.body;
+        const { paymentIds } = req.body;
 
-        if (!user) {
-            return res.status(400).json({ message: "User requerido" });
+        if (!paymentIds || !Array.isArray(paymentIds) || paymentIds.length === 0) {
+            return res.status(400).json({ message: "Se requiere un array de IDs" });
         }
 
-        const deletePayment = await PaymentMethod.findOneAndDelete({
-            _id: id,
-            user
+        const deleted = await PaymentMethod.deleteMany({
+            _id: { $in: paymentIds }
         });
 
-        if (!deletePayment) {
-            return res.status(404).json({ message: "Método de pago no encontrado" });
-        }
-
-        return res.status(204).send();
+        return res.status(200).json({
+            message: "Métodos de pago eliminados",
+            deletedCount: deleted.deletedCount
+        });
 
     } catch (error) {
         next(error);
     }
 };
-
 export {
     getPaymentMethod,
     getPaymentMethodById,

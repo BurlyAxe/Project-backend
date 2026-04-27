@@ -29,10 +29,10 @@ const updateVideogameValidation = [
     body("stock").optional().isInt({ min: 0 })
 ];
 
-router.get("/games", getVideogames);
-router.get ("/games/:id", videogameIdValidation, validate, getVideogameById);
-router.post ("/games", createVideogameValidation, validate, createVideogame);
-router.put("/games/:id", updateVideogameValidation, validate, updateVideogame);
-router.delete("/games/:id", videogameIdValidation, validate, deleteVideogame);
+router.get("/games", authMiddleware, getVideogames);
+router.get ("/games/:id", authMiddleware, videogameIdValidation, validate, getVideogameById);
+router.post ("/games", authMiddleware, isAdmin, createVideogameValidation, validate, createVideogame);
+router.put("/games/:id", authMiddleware, isAdmin, updateVideogameValidation, validate, updateVideogame);
+router.delete("/games/:id", authMiddleware, isAdmin, videogameIdValidation, validate, deleteVideogame);
 
 export default router;

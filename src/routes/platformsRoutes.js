@@ -11,7 +11,7 @@ const createPlatformValidation = [
     body("name").notEmpty().withMessage("El nombre de la plataforma es reqerido"),
 ];
 
-router.get("/platforms", getPlatforms);
-router.post("/platforms", createPlatformValidation, validate, createPlatform);
+router.get("/platforms", authMiddleware, isAdmin, getPlatforms);
+router.post("/platforms", authMiddleware, isAdmin, createPlatformValidation, validate, createPlatform);
 
 export default router;

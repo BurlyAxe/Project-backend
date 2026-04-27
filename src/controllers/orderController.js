@@ -3,7 +3,12 @@ import Cart from "../models/Cart.js";
 
 const getOrder = async (req, res, next) => {
     try {
-        const orders = await Order.find()
+        const { userId } = req.query;
+
+        let filter = {};
+        if (userId) filter.user = userId;
+
+        const orders = await Order.find(filter)
             .populate("user")
             .populate("videogames.videogame")
             .populate("address")
@@ -77,7 +82,6 @@ const createOrder = async (req, res, next) => {
         await newOrder.populate("address");
         await newOrder.populate("paymentMethod");
 
-        // 🔥 Vaciar carrito después de comprar
         cart.videogames = [];
         await cart.save();
 
@@ -93,9 +97,18 @@ const updateOrderStatus = async (req, res, next) => {
         const { orderId } = req.params;
         const { status, paymentStatus } = req.body;
 
+        const updateFields = {};
+
+        if (status) updateFields.status = status;
+        if (paymentStatus) updateFields.paymentStatus = paymentStatus;
+
+        if (Object.keys(updateFields).length === 0) {
+            return res.status(400).json({ message: "No hay datos para actualizar" });
+        }
+
         const updated = await Order.findByIdAndUpdate(
             orderId,
-            { status, paymentStatus },
+            updateFields,
             { new: true }
         );
 

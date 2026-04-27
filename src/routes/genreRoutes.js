@@ -11,7 +11,7 @@ const createGenreValidation = [
     body("name").notEmpty().withMessage("Nombre de genero requerido"),
 ];
 
-router.get("/genres", getGenres);
-router.post("/genres", createGenreValidation, validate,  createGenre);
+router.get("/genres", authMiddleware, isAdmin, getGenres);
+router.post("/genres", authMiddleware, isAdmin, createGenreValidation, validate,  createGenre);
 
 export default router;
