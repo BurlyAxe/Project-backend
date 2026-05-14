@@ -1,9 +1,9 @@
 import express from "express";
 import { getOrder, getOrderById, createOrder, updateOrderStatus } from "../controllers/orderController.js";
 import { body, param } from "express-validator";
-import validate from "../middlewares/validation.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
-import isAdmin from "../middlewares/isAdmin.js";
+import isAdmin from "../middlewares/isAdminMiddleware.js"
+import validate from "../middlewares/validation.js";
 
 const router = express.Router();
 

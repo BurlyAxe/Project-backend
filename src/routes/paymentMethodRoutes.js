@@ -3,6 +3,7 @@ import { getPaymentMethod, getPaymentMethodById, createPaymentMethod, updatePaym
 import { body, param } from "express-validator";
 import authMiddleware from "../middlewares/authMiddleware.js";
 import validate from "../middlewares/validation.js";
+import isAdmin from "../middlewares/isAdminMiddleware.js";
 
 const router = express.Router();
 
