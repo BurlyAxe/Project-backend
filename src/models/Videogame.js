@@ -7,34 +7,45 @@ const videogameSchema = new mongoose.Schema(
             required: true,
             trim: true,
         },
+
         description: {
             type: String,
             required: true,
         },
+
         releaseDate: {
             type: Date,
         },
-       platforms: [
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Platform',
-        }
-    ],
+
+        platforms: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Platform',
+            }
+        ],
+
         genre: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Genre',
-        },
-        classification: {
-            type: String,
             required: true,
         },
+
+        classification: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Classification',
+            required: true,
+        },
+
         price: {
             type: Number,
             required: true,
+            min: 0,
         },
+
         stock: {
             type: Number,
             default: 1,
+            min: 0,
         },
     },
     {

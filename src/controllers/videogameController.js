@@ -134,7 +134,7 @@ const updateVideogame = async (req, res, next) => {
         const { id } = req.params;
         const { name, price, stock} = req.body;
 
-        if (!name === undefined && price === undefined && stock === undefined) {
+        if (name === undefined && price === undefined && stock === undefined) {
             return res.status(400).json({ message: "Datos insuficientes" });
         }
 

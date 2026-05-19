@@ -4,6 +4,7 @@ import connectDB from './src/config/db.js';
 import routes from './src/routes/index.js';
 import logger from './src/middlewares/logger.js';
 import errorHandler from './src/middlewares/errorHandler.js';
+import cors from 'cors';
 
 dotenv.config();
 
@@ -14,6 +15,7 @@ const PORT = 3000;
 app.use(express.json());
 app.use(logger);
 app.use(errorHandler);
+app.use(cors());
 
 connectDB();
 
